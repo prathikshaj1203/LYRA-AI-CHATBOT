@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lyra AI — Your Calm Companion</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="chat_container">
+    <h1 class="title">🐥 Lyra AI</h1>
+    <button class="reset_button" onclick="resetChat()">🌀 Reset</button>
+
+    <div id="chat_box" class="chat_box"></div>
+
+    <form onsubmit="sendMessage(event)" class="input_form">
+      <input type="text" id="user_input" placeholder="Talk to Lyra..." required />
+      <button type="submit" class="send_button">➡️</button>
+    </form>
+  </div>
+
+  <script>
+    async function sendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById("user_input");
+      const chatBox = document.getElementById("chat_box");
+
+      const userText = input.value;
+      chatBox.innerHTML += `
+        <div class="message user">
+          <div class="avatar">🦕</div>
+          <div class="bubble">${userText}</div>
+        </div>
+      `;
+      input.value = "";
+
+      const response = await fetch("/ask", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({question: userText})
+      });
+
+      const data = await response.json();
+      chatBox.innerHTML += `
+        <div class="message bot">
+          <div class="avatar">🐇</div>
+          <div class="bubble">${data.reply}</div>
+        </div>
+      `;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function resetChat() {
+      await fetch("/reset");
+      document.getElementById("chat_box").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
